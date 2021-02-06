@@ -619,7 +619,7 @@ macro_rules! impl_Fp {
 
             #[inline]
             fn add(self, other: &Self) -> Self {
-                let mut result = self.clone();
+                let mut result = self;
                 result.add_assign(other);
                 result
             }
@@ -630,7 +630,7 @@ macro_rules! impl_Fp {
 
             #[inline]
             fn sub(self, other: &Self) -> Self {
-                let mut result = self.clone();
+                let mut result = self;
                 result.sub_assign(other);
                 result
             }
@@ -641,7 +641,7 @@ macro_rules! impl_Fp {
 
             #[inline]
             fn mul(self, other: &Self) -> Self {
-                let mut result = self.clone();
+                let mut result = self;
                 result.mul_assign(other);
                 result
             }
@@ -652,7 +652,7 @@ macro_rules! impl_Fp {
 
             #[inline]
             fn div(self, other: &Self) -> Self {
-                let mut result = self.clone();
+                let mut result = self;
                 result.mul_assign(&other.inverse().unwrap());
                 result
             }
