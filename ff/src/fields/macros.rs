@@ -117,7 +117,7 @@ macro_rules! impl_Fp {
                 Self(element, PhantomData)
             }
 
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             const fn const_is_zero(&self) -> bool {
                 let mut is_zero = true;
                 for i in 0..$limbs {
@@ -165,7 +165,7 @@ macro_rules! impl_Fp {
                 }
             }
 
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             const fn mul_without_reduce(mut self, other: &Self, modulus: $BigIntegerType, inv: u64) -> Self {
                 let mut r = [0u64; $limbs * 2];
 
@@ -195,14 +195,14 @@ macro_rules! impl_Fp {
                 self
             }
 
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             const fn const_mul(mut self, other: &Self, modulus: $BigIntegerType, inv: u64) -> Self {
                 self = self.mul_without_reduce(other, modulus, inv);
                 self.const_reduce(modulus)
             }
 
 
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             const fn const_is_valid(&self, modulus: $BigIntegerType) -> bool {
                 for i in 0..$limbs {
                     if (self.0).0[($limbs - i - 1)] < modulus.0[($limbs - i - 1)] {
@@ -222,7 +222,7 @@ macro_rules! impl_Fp {
                 self
             }
 
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             // need unused assignment because the last iteration of the loop produces an assignment
             // to `borrow` that is unused.
             #[allow(unused_assignments)]

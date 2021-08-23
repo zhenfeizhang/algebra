@@ -7,7 +7,7 @@
 macro_rules! impl_field_mul_assign {
     ($limbs:expr) => {
         #[inline]
-        #[ark_ff_asm::unroll_for_loops]
+        #[unroll::unroll_for_loops]
         fn mul_assign(&mut self, other: &Self) {
             // Checking the modulus at compile time
             let first_bit_set = P::MODULUS.0[$limbs - 1] >> 63 != 0;
@@ -59,7 +59,7 @@ macro_rules! impl_field_mul_assign {
 macro_rules! impl_field_into_repr {
     ($limbs:expr, $BigIntegerType:ty) => {
         #[inline]
-        #[ark_ff_asm::unroll_for_loops]
+        #[unroll::unroll_for_loops]
         #[allow(clippy::modulo_one)]
         fn into_repr(&self) -> $BigIntegerType {
             let mut tmp = self.0;
@@ -85,7 +85,7 @@ macro_rules! impl_field_into_repr {
 macro_rules! impl_field_square_in_place {
     ($limbs: expr) => {
         #[inline]
-        #[ark_ff_asm::unroll_for_loops]
+        #[unroll::unroll_for_loops]
         #[allow(unused_braces, clippy::absurd_extreme_comparisons)]
         fn square_in_place(&mut self) -> &mut Self {
             if $limbs == 1 {

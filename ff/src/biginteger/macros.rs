@@ -13,7 +13,7 @@ macro_rules! bigint_impl {
             const NUM_LIMBS: usize = $num_limbs;
 
             #[inline]
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             fn add_nocarry(&mut self, other: &Self) -> bool {
                 let mut carry = 0;
 
@@ -35,7 +35,7 @@ macro_rules! bigint_impl {
             }
 
             #[inline]
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             fn sub_noborrow(&mut self, other: &Self) -> bool {
                 let mut borrow = 0;
 
@@ -57,7 +57,7 @@ macro_rules! bigint_impl {
             }
 
             #[inline]
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             #[allow(unused)]
             fn mul2(&mut self) {
                 #[cfg(all(target_arch = "x86_64", feature = "asm"))]
@@ -87,7 +87,7 @@ macro_rules! bigint_impl {
             }
 
             #[inline]
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             fn muln(&mut self, mut n: u32) {
                 if n >= 64 * $num_limbs {
                     *self = Self::from(0);
@@ -116,7 +116,7 @@ macro_rules! bigint_impl {
             }
 
             #[inline]
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             #[allow(unused)]
             fn div2(&mut self) {
                 let mut t = 0;
@@ -130,7 +130,7 @@ macro_rules! bigint_impl {
             }
 
             #[inline]
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             fn divn(&mut self, mut n: u32) {
                 if n >= 64 * $num_limbs {
                     *self = Self::from(0);
@@ -301,7 +301,7 @@ macro_rules! bigint_impl {
 
         impl Ord for $name {
             #[inline]
-            #[ark_ff_asm::unroll_for_loops]
+            #[unroll::unroll_for_loops]
             fn cmp(&self, other: &Self) -> ::core::cmp::Ordering {
                 use core::cmp::Ordering;
                 for i in 0..$num_limbs {
