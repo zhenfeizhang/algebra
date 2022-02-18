@@ -74,13 +74,13 @@ impl<F: FftField> Radix2EvaluationDomain<F> {
     /// e.g. for the domain [1, g, g^2, ..., g^{n - 1}], it computes
     // [1, g, g^2, ..., g^{(n/2) - 1}]
     #[cfg(not(feature = "parallel"))]
-    pub(super) fn roots_of_unity(&self, root: F) -> Vec<F> {
+    pub fn roots_of_unity(&self, root: F) -> Vec<F> {
         compute_powers_serial((self.size as usize) / 2, root)
     }
 
     /// Computes the first `self.size / 2` roots of unity.
     #[cfg(feature = "parallel")]
-    pub(super) fn roots_of_unity(&self, root: F) -> Vec<F> {
+    pub fn roots_of_unity(&self, root: F) -> Vec<F> {
         // TODO: check if this method can replace parallel compute powers.
         let log_size = ark_std::log2(self.size as usize);
         // early exit for short inputs
