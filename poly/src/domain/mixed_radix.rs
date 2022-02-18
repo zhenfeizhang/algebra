@@ -152,6 +152,10 @@ impl<F: FftField> EvaluationDomain<F> for MixedRadixEvaluationDomain<F> {
         self.generator_inv
     }
 
+    fn roots_of_unity(&self) -> Vec<F>{
+        unimplemented!()
+    }
+
     #[inline]
     fn fft_in_place<T: DomainCoeff<F>>(&self, coeffs: &mut Vec<T>) {
         coeffs.resize(self.size(), T::zero());

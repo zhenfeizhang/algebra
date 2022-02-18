@@ -225,6 +225,10 @@ impl<F: FftField> EvaluationDomain<F> for GeneralEvaluationDomain<F> {
         map!(self, generator_inv)
     }
 
+    fn roots_of_unity(&self) -> Vec<F>{
+        unimplemented!()
+    }
+
     #[inline]
     fn fft_in_place<T: DomainCoeff<F>>(&self, coeffs: &mut Vec<T>) {
         map!(self, fft_in_place, coeffs)

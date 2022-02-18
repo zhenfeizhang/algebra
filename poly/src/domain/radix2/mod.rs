@@ -120,6 +120,10 @@ impl<F: FftField> EvaluationDomain<F> for Radix2EvaluationDomain<F> {
         self.generator_inv
     }
 
+    fn roots_of_unity(&self) -> Vec<F>{
+        self.roots_of_unity(self.generator_inv)
+    }
+
     #[inline]
     fn fft_in_place<T: DomainCoeff<F>>(&self, coeffs: &mut Vec<T>) {
         coeffs.resize(self.size(), T::zero());

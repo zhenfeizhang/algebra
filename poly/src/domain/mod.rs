@@ -73,6 +73,9 @@ pub trait EvaluationDomain<F: FftField>:
     /// Return the inverse of the multiplicative generator of `F`.
     fn generator_inv(&self) -> F;
 
+    /// Return the roots of the unity
+    fn roots_of_unity(&self) -> Vec<F>;
+
     /// Compute a FFT.
     #[inline]
     fn fft<T: DomainCoeff<F>>(&self, coeffs: &[T]) -> Vec<T> {

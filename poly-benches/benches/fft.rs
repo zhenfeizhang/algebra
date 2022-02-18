@@ -61,6 +61,15 @@ fn fft_common_setup<F: FftField, D: EvaluationDomain<F>>(degree: usize) -> (D, V
     (domain, a)
 }
 
+fn bench_fft_root_gen<F: FftField, D: EvaluationDomain<F>>(b: &mut Bencher, degree: &usize) {
+    // Per benchmark setup
+    let (domain, _) = fft_common_setup::<F, D>(*degree);
+    b.iter(|| {
+        // Per benchmark iteration
+        domain.roots_of_unity();
+    });
+}
+
 fn bench_fft_in_place<F: FftField, D: EvaluationDomain<F>>(b: &mut Bencher, degree: &usize) {
     // Per benchmark setup
     let (domain, mut a) = fft_common_setup::<F, D>(*degree);
@@ -102,6 +111,8 @@ fn fft_benches<F: FftField, D: EvaluationDomain<F>>(
     name: &'static str,
     size_range: &[usize],
 ) {
+    let cur_name = format!("{:?} - root_of_unity_generation", name.clone());
+    setup_bench(c, &cur_name, bench_fft_root_gen::<F, D>, size_range);
     let cur_name = format!("{:?} - subgroup_fft_in_place", name.clone());
     setup_bench(c, &cur_name, bench_fft_in_place::<F, D>, size_range);
     let cur_name = format!("{:?} - subgroup_ifft_in_place", name.clone());
