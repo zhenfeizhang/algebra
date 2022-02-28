@@ -389,11 +389,11 @@ pub fn montgomery_primefield_test<T: MontConfig<N>, const N: usize>() {
             for _i in 0..adicity {
                 e = e.modpow(&base.into(), &modulus)
             }
-        },
-        (None, None) => {},
-        (_, _) => {
+        }
+        (None, None) => {}
+        (..) => {
             panic!("Should specify both `SMALL_SUBGROUP_BASE` and `SMALL_SUBGROUP_BASE_ADICITY`")
-        },
+        }
     }
 }
 

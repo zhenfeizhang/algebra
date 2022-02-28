@@ -1,23 +1,29 @@
 extern crate criterion;
 
-use ark_ff::FftField;
+use ark_ec::{msm::VariableBase, short_weierstrass_jacobian::GroupAffine, SWModelParameters};
+use ark_ff::{FftField, PrimeField};
 use ark_poly::{
     polynomial::{univariate::DensePolynomial, UVPolynomial},
-    EvaluationDomain, MixedRadixEvaluationDomain, Radix2EvaluationDomain,
+    EvaluationDomain, Evaluations, MixedRadixEvaluationDomain, Radix2EvaluationDomain,
 };
 use ark_poly_benches::size_range;
-use ark_test_curves::{bls12_381::Fr as bls12_381_fr, mnt4_753::Fq as mnt6_753_fr};
+use ark_std::{test_rng, UniformRand};
+use ark_test_curves::{
+    bls12_381::g1::Parameters as bls12_381_g1param, bls12_381::Fr as bls12_381_fr,
+    mnt4_753::Fq as mnt6_753_fr,
+};
 use criterion::{criterion_group, criterion_main, Bencher, BenchmarkId, Criterion};
 
 // degree bounds to benchmark on
-// e.g. degree bound of 2^{15}, means we do an FFT for a degree (2^{15} - 1) polynomial
+// e.g. degree bound of 2^{15}, means we do an FFT for a degree (2^{15} - 1)
+// polynomial
 const BENCHMARK_MIN_DEGREE: usize = 1 << 15;
-const BENCHMARK_MAX_DEGREE_BLS12_381: usize = 1 << 22;
+const BENCHMARK_MAX_DEGREE_BLS12_381: usize = 1 << 25;
 const BENCHMARK_MAX_DEGREE_MNT6_753: usize = 1 << 17;
 const BENCHMARK_LOG_INTERVAL_DEGREE: usize = 1;
 
 const ENABLE_RADIX2_BENCHES: bool = true;
-const ENABLE_MIXED_RADIX_BENCHES: bool = true;
+const ENABLE_MIXED_RADIX_BENCHES: bool = false;
 
 // returns vec![2^{min}, 2^{min + interval}, ..., 2^{max}], where:
 // interval = BENCHMARK_LOG_INTERVAL_DEGREE
@@ -106,7 +112,43 @@ fn bench_coset_ifft_in_place<F: FftField, D: EvaluationDomain<F>>(b: &mut Benche
     });
 }
 
-fn fft_benches<F: FftField, D: EvaluationDomain<F>>(
+fn bench_interpolation<F: FftField, D: EvaluationDomain<F>>(b: &mut Bencher, degree: &usize) {
+    // Per benchmark setup
+    let mut rng = test_rng();
+    let (domain, _) = fft_common_setup::<F, D>(*degree);
+    let evals: Vec<F> = (0..*degree).map(|_| F::rand(&mut rng)).collect();
+    let eval = Evaluations::from_vec_and_domain(evals, domain);
+    b.iter(|| {
+        // Per benchmark iteration
+        eval.clone().interpolate();
+    });
+}
+
+fn bench_msm<F, P>(b: &mut Bencher, degree: &usize)
+where
+    F: PrimeField,
+    P: SWModelParameters<ScalarField = F>,
+{
+    // Per benchmark setup
+    let mut rng = test_rng();
+    let scalar: Vec<P::ScalarField> = (0..*degree)
+        .map(|_| P::ScalarField::rand(&mut rng))
+        .collect();
+    let scalar_repr: Vec<<P::ScalarField as PrimeField>::BigInt> =
+        scalar.iter().map(|x| (*x).into_bigint()).collect();
+    // let scalars:Vec<F::BigInt> = (0..*degree).map(|_|F::rand(&mut
+    // rng).into_repr()).collect();
+    let bases: Vec<GroupAffine<P>> = (0..*degree)
+        .map(|_| GroupAffine::<P>::rand(&mut rng))
+        .collect();
+
+    b.iter(|| {
+        // Per benchmark iteration
+        let _ = VariableBase::msm(&bases, &scalar_repr);
+    });
+}
+
+fn fft_benches<F: PrimeField, D: EvaluationDomain<F>>(
     c: &mut Criterion,
     name: &'static str,
     size_range: &[usize],
@@ -121,6 +163,17 @@ fn fft_benches<F: FftField, D: EvaluationDomain<F>>(
     setup_bench(c, &cur_name, bench_coset_fft_in_place::<F, D>, size_range);
     let cur_name = format!("{:?} - coset_ifft_in_place", name.clone());
     setup_bench(c, &cur_name, bench_coset_ifft_in_place::<F, D>, size_range);
+    let cur_name = format!("{:?} - interpolation", name.clone());
+    setup_bench(c, &cur_name, bench_interpolation::<F, D>, size_range);
+}
+
+fn msm_benches<F, P>(c: &mut Criterion, name: &'static str, size_range: &[usize])
+where
+    F: PrimeField,
+    P: SWModelParameters<ScalarField = F>,
+{
+    let cur_name = format!("{:?} - msm", name.clone());
+    setup_bench(c, &cur_name, bench_msm::<F, P>, size_range);
 }
 
 fn bench_bls12_381(c: &mut Criterion) {
@@ -132,6 +185,7 @@ fn bench_bls12_381(c: &mut Criterion) {
             &default_size_range_bls12_381(),
         );
     }
+    msm_benches::<bls12_381_fr, bls12_381_g1param>(c, name, &default_size_range_bls12_381());
 }
 
 fn bench_mnt6_753(c: &mut Criterion) {

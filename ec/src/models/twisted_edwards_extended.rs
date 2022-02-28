@@ -831,8 +831,9 @@ impl<P: Parameters> GroupAffine<P> {
     /// If and only if `greatest` is set will the lexicographically
     /// largest y-coordinate be selected.
     ///
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     #[allow(dead_code)]
     pub fn get_point_from_x_old(x: P::BaseField, greatest: bool) -> Option<Self> {
         let x2 = x.square();
@@ -846,8 +847,9 @@ impl<P: Parameters> GroupAffine<P> {
             Self::new(x, y)
         })
     }
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn serialize_old<W: Write>(&self, writer: W) -> Result<(), SerializationError> {
         if self.is_zero() {
             let flags = EdwardsFlags::default();
@@ -863,8 +865,9 @@ impl<P: Parameters> GroupAffine<P> {
 
     #[allow(unused_qualifications)]
     #[inline]
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn serialize_uncompressed_old<W: Write>(
         &self,
         mut writer: W,
@@ -875,8 +878,9 @@ impl<P: Parameters> GroupAffine<P> {
     }
 
     #[allow(unused_qualifications)]
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn deserialize_uncompressed_old<R: Read>(reader: R) -> Result<Self, SerializationError> {
         let p = Self::deserialize_unchecked(reader)?;
 
@@ -885,8 +889,9 @@ impl<P: Parameters> GroupAffine<P> {
         }
         Ok(p)
     }
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn deserialize_old<R: Read>(mut reader: R) -> Result<Self, SerializationError> {
         let (x, flags): (P::BaseField, EdwardsFlags) =
             CanonicalDeserializeWithFlags::deserialize_with_flags(&mut reader)?;
@@ -903,8 +908,9 @@ impl<P: Parameters> GroupAffine<P> {
     }
 }
 impl<P: Parameters> GroupProjective<P> {
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn serialize_old<W: Write>(&self, writer: W) -> Result<(), SerializationError> {
         let aff = GroupAffine::<P>::from(self.clone());
         aff.serialize_old(writer)
@@ -912,8 +918,9 @@ impl<P: Parameters> GroupProjective<P> {
 
     #[allow(unused_qualifications)]
     #[inline]
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn serialize_uncompressed_old<W: Write>(
         &self,
         writer: W,
@@ -923,14 +930,16 @@ impl<P: Parameters> GroupProjective<P> {
     }
 
     #[allow(unused_qualifications)]
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn deserialize_uncompressed_old<R: Read>(reader: R) -> Result<Self, SerializationError> {
         let aff = GroupAffine::<P>::deserialize_uncompressed(reader)?;
         Ok(aff.into())
     }
-    /// This method is implemented for backwards compatibility with the old serialization format
-    /// and will be deprecated and then removed in a future version.
+    /// This method is implemented for backwards compatibility with the old
+    /// serialization format and will be deprecated and then removed in a
+    /// future version.
     pub fn deserialize_old<R: Read>(reader: R) -> Result<Self, SerializationError> {
         let aff = GroupAffine::<P>::deserialize_old(reader)?;
         Ok(aff.into())

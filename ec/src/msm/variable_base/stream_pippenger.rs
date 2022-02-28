@@ -1,5 +1,4 @@
 //! A space-efficient implementation of Pippenger's algorithm.
-//!
 use crate::AffineCurve;
 use ark_ff::{PrimeField, Zero};
 

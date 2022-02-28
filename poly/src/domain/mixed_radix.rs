@@ -152,7 +152,7 @@ impl<F: FftField> EvaluationDomain<F> for MixedRadixEvaluationDomain<F> {
         self.generator_inv
     }
 
-    fn roots_of_unity(&self) -> Vec<F>{
+    fn roots_of_unity(&self) -> Vec<F> {
         unimplemented!()
     }
 

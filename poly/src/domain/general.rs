@@ -75,7 +75,7 @@ impl<F: FftField> CanonicalSerialize for GeneralEvaluationDomain<F> {
             GeneralEvaluationDomain::Radix2(domain) => domain.serialize_uncompressed(&mut writer),
             GeneralEvaluationDomain::MixedRadix(domain) => {
                 domain.serialize_uncompressed(&mut writer)
-            },
+            }
         }
     }
 
@@ -225,7 +225,7 @@ impl<F: FftField> EvaluationDomain<F> for GeneralEvaluationDomain<F> {
         map!(self, generator_inv)
     }
 
-    fn roots_of_unity(&self) -> Vec<F>{
+    fn roots_of_unity(&self) -> Vec<F> {
         unimplemented!()
     }
 
