@@ -58,6 +58,31 @@ fn setup_bench(
     group.finish();
 }
 
+fn setup_msm_bench<F, P>(
+    c: &mut Criterion,
+    name: &str,
+    bench_fn: fn(&mut Bencher, &usize),
+    size_range: &[usize],
+    scalars: &[<P::ScalarField as PrimeField>::BigInt],
+    basis: &[GroupAffine<P>],
+) where
+    F: PrimeField,
+    P: SWModelParameters<ScalarField = F>,
+{
+    let mut group = c.benchmark_group(name);
+    group.sample_size(10);
+    for degree in size_range.iter() {
+        group.bench_with_input(
+            BenchmarkId::from_parameter(degree),
+            &(degree,
+            scalars,
+            basis),
+            bench_fn,
+        );
+    }
+    group.finish();
+}
+
 fn fft_common_setup<F: FftField, D: EvaluationDomain<F>>(degree: usize) -> (D, Vec<F>) {
     let mut rng = &mut ark_std::test_rng();
     let domain = D::new(degree).unwrap();
@@ -124,23 +149,17 @@ fn bench_interpolation<F: FftField, D: EvaluationDomain<F>>(b: &mut Bencher, deg
     });
 }
 
-fn bench_msm<F, P>(b: &mut Bencher, degree: &usize)
-where
+fn bench_msm<F, P>(
+    b: &mut Bencher,
+    degree: &usize,
+    scalars: &[<P::ScalarField as PrimeField>::BigInt],
+    basis: &[GroupAffine<P>],
+) where
     F: PrimeField,
     P: SWModelParameters<ScalarField = F>,
 {
-    // Per benchmark setup
-    let mut rng = test_rng();
-    let scalar: Vec<P::ScalarField> = (0..*degree)
-        .map(|_| P::ScalarField::rand(&mut rng))
-        .collect();
-    let scalar_repr: Vec<<P::ScalarField as PrimeField>::BigInt> =
-        scalar.iter().map(|x| (*x).into_bigint()).collect();
-    // let scalars:Vec<F::BigInt> = (0..*degree).map(|_|F::rand(&mut
-    // rng).into_repr()).collect();
-    let bases: Vec<GroupAffine<P>> = (0..*degree)
-        .map(|_| GroupAffine::<P>::rand(&mut rng))
-        .collect();
+    let scalar_repr = scalars[0..*degree].to_vec();
+    let bases = basis[0..*degree].to_vec();
 
     b.iter(|| {
         // Per benchmark iteration
@@ -172,8 +191,26 @@ where
     F: PrimeField,
     P: SWModelParameters<ScalarField = F>,
 {
+    // Per benchmark setup
+    let mut rng = test_rng();
+    let scalars: Vec<P::ScalarField> = (0..1 << BENCHMARK_MAX_DEGREE_BLS12_381)
+        .map(|_| P::ScalarField::rand(&mut rng))
+        .collect();
+    let scalars_repr: Vec<<P::ScalarField as PrimeField>::BigInt> =
+        scalars.iter().map(|x| (*x).into_bigint()).collect();
+    let bases: Vec<GroupAffine<P>> = (0..1 << BENCHMARK_MAX_DEGREE_BLS12_381)
+        .map(|_| GroupAffine::<P>::rand(&mut rng))
+        .collect();
+
     let cur_name = format!("{:?} - msm", name.clone());
-    setup_bench(c, &cur_name, bench_msm::<F, P>, size_range);
+    setup_msm_bench(
+        c,
+        &cur_name,
+        bench_msm::<F, P>,
+        size_range,
+        &scalars_repr,
+        &bases,
+    );
 }
 
 fn bench_bls12_381(c: &mut Criterion) {
