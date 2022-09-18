@@ -114,18 +114,49 @@ impl<F: Field> MultilinearExtension<F> for DenseMultilinearExtension<F> {
         let nv = self.num_vars;
         let dim = partial_point.len();
         // evaluate single variable of partial point from left to right
-        for i in 1..dim + 1 {
-            let r = partial_point[i - 1];
-            for b in 0..(1 << (nv - i)) {
-                poly[b] = poly[b << 1] * (F::one() - r) + poly[(b << 1) + 1] * r;
-            }
+        for i in 0..dim {
+            poly = fix_one_variable_helper(&poly, nv - i, &partial_point[i]);
         }
+
         Self::from_evaluations_slice(nv - dim, &poly[..(1 << (nv - dim))])
+    }
+
+    fn fix_first_variable(&self, partial_point: &F) -> Self {
+        assert!(self.num_vars != 0, "invalid size of partial point");
+
+        let nv = self.num_vars;
+        let res = fix_one_variable_helper(&self.evaluations, nv, partial_point);
+        Self::from_evaluations_slice(nv - 1, &res)
     }
 
     fn to_evaluations(&self) -> Vec<F> {
         self.evaluations.to_vec()
     }
+}
+
+fn fix_one_variable_helper<F: Field>(data: &[F], nv: usize, point: &F) -> Vec<F> {
+    let mut res = vec![F::zero(); 1 << (nv - 1)];
+    let one_minus_p = F::one() - point;
+
+    // evaluate single variable of partial point from left to right
+    #[cfg(not(feature = "parallel"))]
+    for b in 0..(1 << (nv - 1)) {
+        res[b] = data[b << 1] * one_minus_p + data[(b << 1) + 1] * point;
+    }
+
+    #[cfg(feature = "parallel")]
+    if nv >= 13 {
+        // on my computer we parallelization doesn't help till nv >= 13
+        res.par_iter_mut().enumerate().for_each(|(i, x)| {
+            *x = data[i << 1] * one_minus_p + data[(i << 1) + 1] * point;
+        });
+    } else {
+        for b in 0..(1 << (nv - 1)) {
+            res[b] = data[b << 1] * one_minus_p + data[(b << 1) + 1] * point;
+        }
+    }
+
+    res
 }
 
 impl<F: Field> Index<usize> for DenseMultilinearExtension<F> {

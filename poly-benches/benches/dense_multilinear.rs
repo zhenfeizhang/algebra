@@ -47,8 +47,22 @@ fn evaluation_op_bench<F: Field>(c: &mut Criterion) {
     group.finish();
 }
 
+fn fix_one_var_bench<F: Field>(c: &mut Criterion) {
+    let mut rng = test_rng();
+    let mut group = c.benchmark_group("Fix var");
+    for nv in NUM_VARIABLES_RANGE {
+        group.bench_with_input(BenchmarkId::new("fix first var", nv), &nv, |b, &nv| {
+            let poly = DenseMultilinearExtension::<F>::rand(nv, &mut rng);
+            let point = F::rand(&mut rng);
+            b.iter(|| black_box(poly.fix_first_variable(&point)))
+        });
+    }
+    group.finish();
+}
+
 fn bench_bls_381(c: &mut Criterion) {
     arithmetic_op_bench::<bls12_381::Fr>(c);
+    fix_one_var_bench::<bls12_381::Fr>(c);
     evaluation_op_bench::<bls12_381::Fr>(c);
 }
 

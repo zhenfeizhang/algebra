@@ -57,6 +57,9 @@ pub trait MultilinearExtension<F: Field>:
     /// Reduce the number of variables of `self` by fixing the `partial_point.len()` variables at `partial_point`.
     fn fix_variables(&self, partial_point: &[F]) -> Self;
 
+    /// Reduce the number of variables of `self` by fixing the first variable at `partial_point`.
+    fn fix_first_variable(&self, partial_point: &F) -> Self;
+
     /// Returns a list of evaluations over the domain, which is the boolean hypercube.
     fn to_evaluations(&self) -> Vec<F>;
 }

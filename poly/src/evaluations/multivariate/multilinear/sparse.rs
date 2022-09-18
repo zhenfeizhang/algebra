@@ -190,6 +190,10 @@ impl<F: Field> MultilinearExtension<F> for SparseMultilinearExtension<F> {
         }
     }
 
+    fn fix_first_variable(&self, _partial_point: &F) -> Self {
+        unimplemented!()
+    }
+
     fn to_evaluations(&self) -> Vec<F> {
         let mut evaluations: Vec<_> = (0..1 << self.num_vars).map(|_| F::zero()).collect();
         self.evaluations
